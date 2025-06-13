@@ -1,0 +1,8 @@
+// 2. List all accounts
+    // 3. Get a single account by userId
+    // 4. Update an existing account’s details
+    // 5. Delete an account
+
+    // 6. Deposit into an account
+    // 7. Withdraw from an account
+    // 8. Transfer between two accounts
