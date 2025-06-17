@@ -13,25 +13,40 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class UserService {
-    private final UserRepository userRepository;
+    //private final UserRepository userRepository;
     private Map<String, User> userStore = new ConcurrentHashMap<>();
 
-    @Inject
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    // @Inject
+    // public UserService(UserRepository userRepository) {
+    //    // this.userRepository = userRepository;
+    // }
+
+   /*  public User addUser(UserRequest user) {
+        return userRepository.addUser(user);
     }
 
-  
-   public  User addUser(UserRequest user){
-    return userRepository.addUser(user);
-   }
-   
-   public User getUserA() {
+    public User getUserA() {
         return (User) userRepository.getAllUsers();
     }
 
+    public User getUserById(String id) {
+        return userRepository.getUser(id);
+    }
 
+    public User updateUserA(String id, UserRequest user) {
+        return userRepository.updateUser(id, user);
+    }
 
+    public void deleteUserA(String id) {
+        userRepository.deleteUser(id);
+    }*/
+
+    /**
+     * Registers a new user.
+     *
+     * @param user the user to register
+     * @return the registered user
+     */
     public User registerUser(User user) {
         userStore.put(user.getId(), user);
         return user;

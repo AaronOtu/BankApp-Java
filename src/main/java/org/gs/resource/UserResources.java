@@ -27,31 +27,19 @@ public class UserResources {
         this.userRepository = userRepository;
     }
 
-    /*@POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response registerUser(User user) {
-        User created = userService.registerUser(user);
-        return Response.status(Response.Status.CREATED).entity(created).build();
-    }*/
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerUser(UserRequest user) {
-        try{
+        try {
 
             User created = userRepository.addUser(user);
             return Response.status(Response.Status.CREATED).entity(created).build();
-        }catch (Exception e) {
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
-    // @GET
-    // @Produces(MediaType.APPLICATION_JSON)
-    // public Response getAllUsers() {
-    //     return Response.ok(userService.getAllUsers()).build();
-    // }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
@@ -62,24 +50,85 @@ public class UserResources {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(String id) {
-        User user = userService.getUser(id);
-        return Response.ok(user).build();
+        try {
+            User user = userRepository.getUser(id);
+            return Response.ok(user).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
     }
 
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(String id, User user) {
-        User updatedUser = userService.updateUser(id, user);
-        return Response.ok(updatedUser).build();
+    public Response updateUser(String id, UserRequest user) {
+        try {
+            User updatedUser = userRepository.updateUser(id, user);
+            return Response.ok(updatedUser).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteUser(String id) {
-        userService.deleteUser(id);
+        userRepository.deleteUser(id);
         return Response.noContent().build();
     }
+
+    /*
+     * @POST
+     * 
+     * @Consumes(MediaType.APPLICATION_JSON)
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response registerUser(User user) {
+     * User created = userService.registerUser(user);
+     * return Response.status(Response.Status.CREATED).entity(created).build();
+     * }
+     * 
+     * 
+     * @GET
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response getAllUsers() {
+     * return Response.ok(userService.getAllUsers()).build();
+     * }
+     * 
+     * @GET
+     * 
+     * @Path("/{id}")
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response getUser(String id) {
+     * User user = userService.getUser(id);
+     * return Response.ok(user).build();
+     * }
+     * 
+     * @PUT
+     * 
+     * @Path("/{id}")
+     * 
+     * @Consumes(MediaType.APPLICATION_JSON)
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response updateUser(String id, User user) {
+     * User updatedUser = userService.updateUser(id, user);
+     * return Response.ok(updatedUser).build();
+     * }
+     * 
+     * @DELETE
+     * 
+     * @Path("/{id}")
+     * public Response deleteUser(String id) {
+     * userService.deleteUser(id);
+     * return Response.noContent().build();
+     * }
+     * 
+     */
 
 }

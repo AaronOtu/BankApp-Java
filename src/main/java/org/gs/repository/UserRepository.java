@@ -25,6 +25,11 @@ public class UserRepository {
 
     @Inject
     AgroalDataSource dataSource;
+    static final String FIRST_NAME = "first_name";
+    static final String LAST_NAME = "last_name";
+    static final String EMAIL = "email";
+    static final String CREATED_AT = "created_at";
+    static final String ID = "id";
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
@@ -35,21 +40,20 @@ public class UserRepository {
                         .executeQuery("SELECT  * FROM users")) {
 
             while (resultSet.next()) {
-                String firstName = resultSet.getString("first_name");
-                String lastName = resultSet.getString("last_name");
-                String email = resultSet.getString("email");
-                // Timestamp createdAt = resultSet.getTimestamp("created_at");
+                String firstName = resultSet.getString(FIRST_NAME);
+                String lastName = resultSet.getString(LAST_NAME);
+                String email = resultSet.getString(EMAIL);
 
                 User user = new User();
-                user.setId(String.valueOf(resultSet.getInt("id")));
-                user.setCreatedAt(resultSet.getString("created_at"));
+                user.setId(String.valueOf(resultSet.getInt(ID)));
+                user.setCreatedAt(resultSet.getString(CREATED_AT));
                 user.setFirstName(firstName);
                 user.setLastName(lastName);
                 user.setEmail(email);
-                // user.setCreatedAt(createdAt);
+
                 users.add(user);
 
-                String userName = firstName + "" + lastName;
+                String userName = firstName + " " + lastName;
                 logger.info("User: " + userName + ", Email: " + email);
             }
             System.out.println("Database connection established successfully.");
@@ -91,10 +95,10 @@ public class UserRepository {
                 if (rs.next()) {
                     User createdUser = new User();
                     createdUser.setId(String.valueOf(rs.getInt("id")));
-                    createdUser.setFirstName(rs.getString("first_name"));
-                    createdUser.setLastName(rs.getString("last_name"));
-                    createdUser.setEmail(rs.getString("email"));
-                    createdUser.setCreatedAt(rs.getString("created_at"));
+                    createdUser.setFirstName(rs.getString(FIRST_NAME));
+                    createdUser.setLastName(rs.getString(LAST_NAME));
+                    createdUser.setEmail(rs.getString(EMAIL));
+                    createdUser.setCreatedAt(rs.getString(CREATED_AT));
                     return createdUser;
                 }
             }
@@ -110,6 +114,66 @@ public class UserRepository {
         }
         return null;
 
+    }
+
+    public User getUser(String id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setId(String.valueOf(rs.getInt(ID)));
+                user.setFirstName(rs.getString(FIRST_NAME));
+                user.setLastName(rs.getString(LAST_NAME));
+                user.setEmail(rs.getString(EMAIL));
+                user.setCreatedAt(rs.getString(CREATED_AT));
+                return user;
+            } else {
+                throw new WebApplicationException("User not found", Response.Status.NOT_FOUND);
+            }
+        } catch (SQLException e) {
+            logger.error("Error while fetching user: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public void deleteUser(String id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, id);
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new WebApplicationException("User not found", Response.Status.NOT_FOUND);
+            }
+        } catch (SQLException e) {
+            logger.error("Error while deleting user: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public User updateUser(String id, UserRequest user) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, id);
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new WebApplicationException("User not found", Response.Status.NOT_FOUND);
+            }
+            return getUser(id);
+        } catch (SQLException e) {
+            logger.error("Error while updating user: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
