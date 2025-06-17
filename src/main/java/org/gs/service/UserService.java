@@ -1,15 +1,36 @@
 package org.gs.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import org.gs.dto.UserRequest;
 import org.gs.exception.UserNotFoundException;
 import org.gs.model.User;
+import org.gs.repository.UserRepository;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class UserService {
+    private final UserRepository userRepository;
     private Map<String, User> userStore = new ConcurrentHashMap<>();
+
+    @Inject
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+  
+   public  User addUser(UserRequest user){
+    return userRepository.addUser(user);
+   }
+   
+   public User getUserA() {
+        return (User) userRepository.getAllUsers();
+    }
+
+
 
     public User registerUser(User user) {
         userStore.put(user.getId(), user);

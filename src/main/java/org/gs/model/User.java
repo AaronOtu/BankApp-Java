@@ -5,6 +5,15 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+    private String createdAt;
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public String getId() {
         return id;

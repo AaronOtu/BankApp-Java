@@ -11,30 +11,51 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.gs.service.UserService;
+import org.gs.dto.UserRequest;
 import org.gs.model.User;
+import org.gs.repository.UserRepository;
 
 @Path("/users")
 public class UserResources {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Inject
-    public UserResources(UserService userService) {
+    public UserResources(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
-    @POST
+    /*@POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerUser(User user) {
         User created = userService.registerUser(user);
         return Response.status(Response.Status.CREATED).entity(created).build();
+    }*/
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response registerUser(UserRequest user) {
+        try{
+
+            User created = userRepository.addUser(user);
+            return Response.status(Response.Status.CREATED).entity(created).build();
+        }catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
     }
 
+    // @GET
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getAllUsers() {
+    //     return Response.ok(userService.getAllUsers()).build();
+    // }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
-        return Response.ok(userService.getAllUsers()).build();
+        return Response.ok(userRepository.getAllUsers()).build();
     }
 
     @GET
