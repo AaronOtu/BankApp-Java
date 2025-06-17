@@ -1,6 +1,7 @@
 package org.gs.resource;
 
 import org.gs.dto.AccountRequest;
+import org.gs.dto.BalanceResponse;
 import org.gs.model.SavingsAccount;
 import org.gs.service.AccountService;
 
@@ -10,6 +11,7 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -63,6 +65,31 @@ public class AccountResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
+
+    // @GET
+    // @Path("/balance/{userId}")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getBalance(@PathParam{"accountId"} String userId) {
+    //     try {
+    //         SavingsAccount account = accountService.getBalance(userId);
+    //         return Response.ok(account).build();
+    //     } catch (Exception e) {
+    //         return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+    //     }
+    // }
+    @GET
+@Path("/{accountId}/balance")
+@Produces(MediaType.APPLICATION_JSON)
+public Response getBalance(@PathParam("accountId") String accountId) {
+    try {
+        SavingsAccount account = accountService.getAccount(accountId);
+        String userName = account.getFirstName() + " " + account.getLastName();
+        BalanceResponse response = new BalanceResponse(account.getBalance(), userName);
+        return Response.ok(response).build();
+    } catch (IllegalArgumentException e) {
+        return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+    }
+}
 
     @DELETE
     @Path("/{userId}")

@@ -47,6 +47,14 @@ public class AccountService {
         return accounts;
     }
     
+    public SavingsAccount getBalance(String userId){
+        SavingsAccount account = accounts.get(userId);
+        if (account == null) {
+            throw new AccountNotFoundException("Account not found for user: " + userId);
+        }
+        account.getBalance();
+        return account;
+    }
 
     public SavingsAccount updateAccount(String userId, AccountRequest request) {
         if (!accounts.containsKey(userId)) {
