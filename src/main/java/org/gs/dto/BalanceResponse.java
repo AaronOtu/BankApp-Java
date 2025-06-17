@@ -12,14 +12,19 @@ public class BalanceResponse {
         this.userName = userName;
     }
 
-    public BalanceResponse() {}
+    public BalanceResponse() {
+    }
 
-    public BalanceResponse(double balance,String userName) {
+    public BalanceResponse(double balance, String userName) {
         this.balance = balance;
         this.userName = userName;
     }
 
-    public double getBalance() { return balance; }
-    public void setBalance(double balance) { this.balance = balance; }
-}
+    public double getBalance() {
+        return balance;
+    }
 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+}

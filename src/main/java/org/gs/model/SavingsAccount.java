@@ -1,13 +1,11 @@
 package org.gs.model;
 
-public class SavingsAccount implements Account{
+public class SavingsAccount implements Account {
     private String firstName;
     private String lastName;
     private double balance = 0.0;
     private String cardDetails;
     private String userId;
-
-
 
     public String getCardDetails() {
         return cardDetails;
@@ -25,8 +23,6 @@ public class SavingsAccount implements Account{
         this.userId = userId;
     }
 
-
-
     public String getFirstName() {
         return firstName;
     }
@@ -43,7 +39,7 @@ public class SavingsAccount implements Account{
         this.lastName = lastName;
     }
 
-  public double setBalance(double balance) {
+    public double setBalance(double balance) {
         this.balance = balance;
         return this.balance;
     }
@@ -58,13 +54,11 @@ public class SavingsAccount implements Account{
         this.userId = userId;
     }
 
-
-   public SavingsAccount(String firstName, String lastName,String cardDetails ){
-          this.firstName = firstName;
-          this.lastName = lastName;
-          this.cardDetails = cardDetails;
+    public SavingsAccount(String firstName, String lastName, String cardDetails) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.cardDetails = cardDetails;
     }
-
 
     @Override
     public Double getBalance() {
@@ -92,13 +86,14 @@ public class SavingsAccount implements Account{
     }
 
     @Override
-    public Double transfer(double amount,String phoneNumber) {
+    public Double transfer(double amount, String phoneNumber) {
         if (amount > balance) {
             throw new IllegalArgumentException("You can't send " + amount + " your balance is " + balance);
         }
         var initial = balance;
         balance -= amount;
-        System.out.println("You have sent " + amount + " to " + phoneNumber + " initial balance " + initial + " your current balance is " + balance);
+        System.out.println("You have sent " + amount + " to " + phoneNumber + " initial balance " + initial
+                + " your current balance is " + balance);
         return amount;
     }
 }

@@ -33,7 +33,7 @@ public class UserResources {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUsers(){
+    public Response getAllUsers() {
         return Response.ok(userService.getAllUsers()).build();
     }
 
@@ -44,7 +44,7 @@ public class UserResources {
         User user = userService.getUser(id);
         return Response.ok(user).build();
     }
-    
+
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -60,8 +60,5 @@ public class UserResources {
         userService.deleteUser(id);
         return Response.noContent().build();
     }
-
-
-
 
 }

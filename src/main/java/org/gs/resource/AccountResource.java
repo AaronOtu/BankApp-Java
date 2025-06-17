@@ -70,26 +70,27 @@ public class AccountResource {
     // @Path("/balance/{userId}")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response getBalance(@PathParam{"accountId"} String userId) {
-    //     try {
-    //         SavingsAccount account = accountService.getBalance(userId);
-    //         return Response.ok(account).build();
-    //     } catch (Exception e) {
-    //         return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-    //     }
+    // try {
+    // SavingsAccount account = accountService.getBalance(userId);
+    // return Response.ok(account).build();
+    // } catch (Exception e) {
+    // return
+    // Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+    // }
     // }
     @GET
-@Path("/{accountId}/balance")
-@Produces(MediaType.APPLICATION_JSON)
-public Response getBalance(@PathParam("accountId") String accountId) {
-    try {
-        SavingsAccount account = accountService.getAccount(accountId);
-        String userName = account.getFirstName() + " " + account.getLastName();
-        BalanceResponse response = new BalanceResponse(account.getBalance(), userName);
-        return Response.ok(response).build();
-    } catch (IllegalArgumentException e) {
-        return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+    @Path("/{accountId}/balance")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBalance(@PathParam("accountId") String accountId) {
+        try {
+            SavingsAccount account = accountService.getAccount(accountId);
+            String userName = account.getFirstName() + " " + account.getLastName();
+            BalanceResponse response = new BalanceResponse(account.getBalance(), userName);
+            return Response.ok(response).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
     }
-}
 
     @DELETE
     @Path("/{userId}")
