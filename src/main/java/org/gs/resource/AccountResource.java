@@ -2,8 +2,6 @@ package org.gs.resource;
 
 import org.gs.dto.AccountRequest;
 import org.gs.dto.AccountResponse;
-import org.gs.dto.BalanceResponse;
-import org.gs.model.SavingsAccount;
 import org.gs.repository.AccountRepository;
 import org.gs.service.AccountService;
 
@@ -13,7 +11,6 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -29,27 +26,6 @@ public class AccountResource {
         this.accountRepository = accountRepository;
     }
 
-    /*
-     * @POST
-     * 
-     * @Path("/create")
-     * 
-     * @Consumes(MediaType.APPLICATION_JSON)
-     * 
-     * @Produces(MediaType.APPLICATION_JSON)
-     * public Response createAccount(AccountRequest account) {
-     * try {
-     * SavingsAccount created = accountService.createAccount(account);
-     * return Response.status(Response.Status.CREATED)
-     * .entity(created)
-     * .build();
-     * } catch (Exception e) {
-     * return
-     * Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-     * }
-     * 
-     * }
-     */
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -71,11 +47,34 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAccount(String userId) {
         try {
-            SavingsAccount account = accountService.getAccount(userId);
+            AccountResponse account = accountRepository.getAccount(userId);
             if (account == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             return Response.ok(account).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllAccounts() {
+        try {
+            return Response.ok(accountRepository.getAllAccounts()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    @DELETE
+    @Path("/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteAccount(String userId) {
+        try {
+            accountRepository.deleteAccount(userId);
+            return Response.ok("Successfully deleted account").build();
+
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -91,15 +90,42 @@ public class AccountResource {
     // Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
     // }
     // }
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllAccounts() {
-        try {
-            return Response.ok(accountRepository.getAllAccounts()).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
-    }
+    // @GET
+    // @Path("/{userId}")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getAccount(String userId) {
+    // try {
+    // SavingsAccount account = accountService.getAccount(userId);
+    // if (account == null) {
+    // return Response.status(Response.Status.NOT_FOUND).build();
+    // }
+    // return Response.ok(account).build();
+    // } catch (Exception e) {
+    // return
+    // Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+    // }
+    // }
+    /*
+     * @POST
+     * 
+     * @Path("/create")
+     * 
+     * @Consumes(MediaType.APPLICATION_JSON)
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response createAccount(AccountRequest account) {
+     * try {
+     * SavingsAccount created = accountService.createAccount(account);
+     * return Response.status(Response.Status.CREATED)
+     * .entity(created)
+     * .build();
+     * } catch (Exception e) {
+     * return
+     * Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+     * }
+     * 
+     * }
+     */
 
     // @GET
     // @Path("/balance/{userId}")
@@ -113,31 +139,34 @@ public class AccountResource {
     // Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
     // }
     // }
-    @GET
-    @Path("/{accountId}/balance")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getBalance(@PathParam("accountId") String accountId) {
-        try {
-            SavingsAccount account = accountService.getAccount(accountId);
-            String userName = account.getFirstName() + " " + account.getLastName();
-            BalanceResponse response = new BalanceResponse(account.getBalance(), userName);
-            return Response.ok(response).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
-    }
+    // @GET
+    // @Path("/{accountId}/balance")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getBalance(@PathParam("accountId") String accountId) {
+    // try {
+    // SavingsAccount account = accountService.getAccount(accountId);
+    // String userName = account.getFirstName() + " " + account.getLastName();
+    // BalanceResponse response = new BalanceResponse(account.getBalance(),
+    // userName);
+    // return Response.ok(response).build();
+    // } catch (IllegalArgumentException e) {
+    // return
+    // Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+    // }
+    // }
 
-    @DELETE
-    @Path("/{userId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteAccount(String userId) {
-        try {
-            accountService.deleteAccount(userId);
-            return Response.noContent().build();
+    // @DELETE
+    // @Path("/{userId}")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response deleteAccount(String userId) {
+    // try {
+    // accountService.deleteAccount(userId);
+    // return Response.noContent().build();
 
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
-    }
+    // } catch (Exception e) {
+    // return
+    // Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+    // }
+    // }
 
 }

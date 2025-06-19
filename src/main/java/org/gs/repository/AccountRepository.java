@@ -86,7 +86,8 @@ public class AccountRepository {
         return null;
 
     }
-     //TODO: join the accounts and users table
+
+    // TODO: join the accounts and users table to fetch userName
     public List<AccountResponse> getAllAccounts() {
         List<AccountResponse> accounts = new ArrayList<>();
 
@@ -114,6 +115,51 @@ public class AccountRepository {
 
         }
         return accounts;
+    }
+
+    public AccountResponse getAccount(String id) {
+        String sql = "SELECT * FROM accounts WHERE id = ?";
+        try (Connection cnn = dataSource.getConnection();
+                PreparedStatement ps = cnn.prepareStatement(sql)) {
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                AccountResponse response = new AccountResponse();
+                response.setId(String.valueOf(rs.getInt("id")));
+                response.setUserId(rs.getString("user_id"));
+                response.setAccountNumber(rs.getString("account_number"));
+                response.setAccountType(rs.getString("account_type"));
+                response.setCreatedAt(rs.getString("created_at"));
+                response.setBalance(rs.getDouble("balance"));
+                return response;
+            } else {
+                throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+            }
+        } catch (SQLException e) {
+            logger.error("Error while fetching user: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+   //TODO: add delete message respone
+    public String deleteAccount(String id) {
+        String sql = "DELETE FROM accounts WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, id);
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+            }
+            return "Account deleted successfully";
+        } catch (SQLException e) {
+            logger.error("Error while deleting account: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
