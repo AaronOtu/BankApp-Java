@@ -1,8 +1,10 @@
 package org.gs.resource;
 
 import org.gs.dto.AccountRequest;
+import org.gs.dto.AccountResponse;
 import org.gs.dto.BalanceResponse;
 import org.gs.model.SavingsAccount;
+import org.gs.repository.AccountRepository;
 import org.gs.service.AccountService;
 
 import jakarta.inject.Inject;
@@ -19,19 +21,36 @@ import jakarta.ws.rs.core.Response;
 @Path("/accounts")
 public class AccountResource {
     private final AccountService accountService;
+    private final AccountRepository accountRepository;
 
     @Inject
-    public AccountResource(AccountService accountService) {
+    public AccountResource(AccountService accountService, AccountRepository accountRepository) {
         this.accountService = accountService;
+        this.accountRepository = accountRepository;
     }
 
-    @POST
+   /*  @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createAccount(AccountRequest account) {
         try {
             SavingsAccount created = accountService.createAccount(account);
+            return Response.status(Response.Status.CREATED)
+                    .entity(created)
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
+    }*/
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createAccount(AccountRequest account) {
+        try {
+            AccountResponse created = accountRepository.createAccount(account);
             return Response.status(Response.Status.CREATED)
                     .entity(created)
                     .build();
