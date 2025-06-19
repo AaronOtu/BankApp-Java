@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gs.dto.AccountRequest;
 import org.gs.dto.AccountResponse;
@@ -83,6 +85,35 @@ public class AccountRepository {
         }
         return null;
 
+    }
+     //TODO: join the accounts and users table
+    public List<AccountResponse> getAllAccounts() {
+        List<AccountResponse> accounts = new ArrayList<>();
+
+        String sql = "SELECT * FROM accounts ";
+        try (Connection cnn = dataSource.getConnection();
+                Statement statement = cnn.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                AccountResponse response = new AccountResponse();
+                response.setId(String.valueOf(rs.getInt("id")));
+                response.setUserId(rs.getString("user_id"));
+                // response.setUserName(userName);
+                response.setAccountNumber(rs.getString("account_number"));
+                response.setAccountType(rs.getString("account_type"));
+                response.setCreatedAt(rs.getString("created_at"));
+                response.setBalance(rs.getDouble("balance"));
+                accounts.add(response);
+
+            }
+        } catch (SQLException e) {
+            logger.error("Error while getting all accounts", e);
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+
+        }
+        return accounts;
     }
 
 }

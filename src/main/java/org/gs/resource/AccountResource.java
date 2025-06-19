@@ -29,21 +29,27 @@ public class AccountResource {
         this.accountRepository = accountRepository;
     }
 
-   /*  @POST
-    @Path("/create")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createAccount(AccountRequest account) {
-        try {
-            SavingsAccount created = accountService.createAccount(account);
-            return Response.status(Response.Status.CREATED)
-                    .entity(created)
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
-
-    }*/
+    /*
+     * @POST
+     * 
+     * @Path("/create")
+     * 
+     * @Consumes(MediaType.APPLICATION_JSON)
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response createAccount(AccountRequest account) {
+     * try {
+     * SavingsAccount created = accountService.createAccount(account);
+     * return Response.status(Response.Status.CREATED)
+     * .entity(created)
+     * .build();
+     * } catch (Exception e) {
+     * return
+     * Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+     * }
+     * 
+     * }
+     */
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -75,11 +81,21 @@ public class AccountResource {
         }
     }
 
+    // @GET
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getAllAccounts() {
+    // try {
+    // return Response.ok(accountService.getAllAccounts()).build();
+    // } catch (Exception e) {
+    // return
+    // Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+    // }
+    // }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAccounts() {
         try {
-            return Response.ok(accountService.getAllAccounts()).build();
+            return Response.ok(accountRepository.getAllAccounts()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
