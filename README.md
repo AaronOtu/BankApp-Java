@@ -12,7 +12,7 @@ You can run your application in dev mode that enables live coding using:
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+> **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
 ## Packaging and running the application
 
@@ -55,7 +55,6 @@ If you want to learn more about building native executables, please consult <htt
 
 ## Related Guides
 
-
 ## Provided Code
 
 ### REST
@@ -63,3 +62,41 @@ If you want to learn more about building native executables, please consult <htt
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+
+# 🏦 BankApp
+
+This is a simple banking application built with **Quarkus**, the Supersonic Subatomic Java Framework. It uses **JDBC and raw SQL** (no ORM) to perform banking operations like creating accounts, retrieving account details, and transferring funds.
+
+If you want to learn more about Quarkus, please visit its website: [https://quarkus.io](https://quarkus.io).
+
+---
+
+## 🚀 Features
+
+- Create and retrieve bank accounts
+- Transfer funds between accounts
+- View account balances
+- Uses raw SQL (no Hibernate/ORM)
+- Modular code structure (DTO, Model, Repository, Service)
+
+---
+
+## 📁 Project Structure
+
+src/
+└── main/
+├── java/org/gs/
+│ ├── controller/ # REST endpoints
+│ ├── service/ # Business logic
+│ ├── repository/ # SQL query layer using JDBC
+│ ├── model/ # POJOs that mirror DB tables
+│ └── dto/ # Input/output data transfer objects
+└── resources/
+├── application.properties # Configuration (e.g., DB connection)
+└── import.sql
+
+✅ TODO
+• Add delete account feature
+• Implement transaction logs
+• Add unit and integration tests
+• Add Docker support

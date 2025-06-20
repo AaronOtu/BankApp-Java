@@ -1,4 +1,4 @@
-package org.gs.resource;
+package org.gs.controller;
 
 public class TransactionsResource {
 

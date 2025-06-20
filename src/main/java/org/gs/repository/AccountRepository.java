@@ -16,6 +16,7 @@ import org.jboss.logging.Logger;
 import io.agroal.api.AgroalDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
@@ -161,5 +162,35 @@ public class AccountRepository {
                     Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public boolean accountExists(String accountId) {
+    String sql = "SELECT 1 FROM accounts WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, accountId);
+        ResultSet rs = ps.executeQuery();
+        return rs.next();
+    } catch (SQLException e) {
+        logger.error("Error checking account existence: " + e.getMessage());
+        return false;
+    }
+}
+
+@Transactional
+public void updateBalance(String accountId, double amount) {
+    String sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setDouble(1, amount);
+        ps.setString(2, accountId);
+        int rowsAffected = ps.executeUpdate();
+        if (rowsAffected == 0) {
+            throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+        }
+    } catch (SQLException e) {
+        logger.error("Error updating balance: " + e.getMessage());
+        throw new WebApplicationException("Failed to update balance", Response.Status.INTERNAL_SERVER_ERROR);
+    }
+}
 
 }

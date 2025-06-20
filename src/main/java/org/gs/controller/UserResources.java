@@ -1,4 +1,4 @@
-package org.gs.resource;
+package org.gs.controller;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -79,56 +79,5 @@ public class UserResources {
         userRepository.deleteUser(id);
         return Response.noContent().build();
     }
-
-    /*
-     * @POST
-     * 
-     * @Consumes(MediaType.APPLICATION_JSON)
-     * 
-     * @Produces(MediaType.APPLICATION_JSON)
-     * public Response registerUser(User user) {
-     * User created = userService.registerUser(user);
-     * return Response.status(Response.Status.CREATED).entity(created).build();
-     * }
-     * 
-     * 
-     * @GET
-     * 
-     * @Produces(MediaType.APPLICATION_JSON)
-     * public Response getAllUsers() {
-     * return Response.ok(userService.getAllUsers()).build();
-     * }
-     * 
-     * @GET
-     * 
-     * @Path("/{id}")
-     * 
-     * @Produces(MediaType.APPLICATION_JSON)
-     * public Response getUser(String id) {
-     * User user = userService.getUser(id);
-     * return Response.ok(user).build();
-     * }
-     * 
-     * @PUT
-     * 
-     * @Path("/{id}")
-     * 
-     * @Consumes(MediaType.APPLICATION_JSON)
-     * 
-     * @Produces(MediaType.APPLICATION_JSON)
-     * public Response updateUser(String id, User user) {
-     * User updatedUser = userService.updateUser(id, user);
-     * return Response.ok(updatedUser).build();
-     * }
-     * 
-     * @DELETE
-     * 
-     * @Path("/{id}")
-     * public Response deleteUser(String id) {
-     * userService.deleteUser(id);
-     * return Response.noContent().build();
-     * }
-     * 
-     */
 
 }
