@@ -9,6 +9,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 import org.gs.dto.AccountResponse;
+import org.gs.dto.BalanceResponse;
 import org.gs.dto.DepositRequest;
 import org.gs.dto.Status;
 import org.gs.dto.TransactionType;
@@ -277,7 +278,6 @@ public class TransactionRepository {
 
             ps.executeUpdate();
 
-            // Get the generated transaction ID
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     int transactionId = rs.getInt(1);
@@ -328,6 +328,44 @@ public class TransactionRepository {
 
     private String generateReference() {
         return "TX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    // TODO add username to the response
+    public BalanceResponse getBalance(String accountId) {
+        String sql = "SELECT * FROM accounts WHERE id = ?";
+        try (Connection cnn = dataSource.getConnection();
+                PreparedStatement ps = cnn.prepareStatement(sql)) {
+
+            ps.setString(1, accountId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String userId = rs.getString("user_id");
+
+                String userSql = "SELECT first_name, last_name FROM users WHERE id = ?";
+                try (PreparedStatement userPs = cnn.prepareStatement(userSql)) {
+                    userPs.setString(1, userId);
+                    ResultSet userRs = userPs.executeQuery();
+                    String userName = "";
+                    if (userRs.next()) {
+                        userName = userRs.getString("first_name") + " " + userRs.getString("last_name");
+                    }
+                    BalanceResponse response = new BalanceResponse();
+                    response.setUserName(userName);
+                    response.setBalance(rs.getDouble("balance"));
+                    return response;
+                }
+
+            } else {
+                throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+            }
+        } catch (SQLException e) {
+            logger.error("Error while fetching user: " + e.getMessage());
+            throw new WebApplicationException("Internal error: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 }

@@ -1,7 +1,7 @@
 # Stage 1: Build the application
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
@@ -9,7 +9,7 @@ COPY . .
 RUN mvn clean install -DskipTests
 
 # Stage 2: Create the runtime image
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
 WORKDIR /app
 

@@ -18,13 +18,13 @@ import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class TransferService {
-     private static final Logger logger = Logger.getLogger(TransferService.class);
+    private static final Logger logger = Logger.getLogger(TransferService.class);
 
     @Inject
     AgroalDataSource dataSource;
 
-   public Transfer save(Transfer transfer) {
-    logger.info("Saving transfer: " + transfer);
+    public Transfer save(Transfer transfer) {
+        logger.info("Saving transfer: " + transfer);
         String sql = "INSERT INTO transactions (" +
                 "account_id, to_account_id, transaction_type, " +
                 "amount, converted_amount, currency, to_currency, exchange_rate, " +

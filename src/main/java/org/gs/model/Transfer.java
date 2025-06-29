@@ -3,7 +3,6 @@ package org.gs.model;
 import java.time.LocalDateTime;
 
 import org.gs.dto.Status;
-import org.gs.dto.TransactionType;
 
 public class Transfer {
     private String id;

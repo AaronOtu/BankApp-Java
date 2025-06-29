@@ -1,11 +1,20 @@
 package org.gs.controller;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.List;
 
 import org.gs.dto.DepositRequest;
 import org.gs.dto.TransferRequest;
 import org.gs.model.Transactions;
 import org.gs.repository.TransactionRepository;
+
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -16,6 +25,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @Path("/transactions")
 public class TransactionsResource {
@@ -64,19 +74,30 @@ public class TransactionsResource {
         }
     }
 
-
     @POST
     @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response transfer(TransferRequest request){
-        try{
+    public Response transfer(TransferRequest request) {
+        try {
             return Response.ok(transactionRepository.transfer(request)).build();
-        }catch(Exception e){
+        } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
-/* 
+
+    @GET
+    @Path("/get-balance/{accountId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBalance(@PathParam("accountId") String accountId) {
+        try {
+            return Response.ok(transactionRepository.getBalance(accountId)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+
+    }
+
     @GET
     @Path("/{userId}/csv")
     @Produces("text/csv")
@@ -98,34 +119,39 @@ public class TransactionsResource {
         return Response.ok(stream)
                 .header("Content-Disposition", "attachment; filename=\"transactions.csv\"")
                 .build();
-    }*/
+    }
 
-   /*  @GET
-    @Path("/{userId}/pdf")
-    @Produces("application/pdf")
-    public Response getTransactionsPdf(@PathParam("userId") String userId) {
-        List<Transactions> transactions = transactionService.getTransactionsByUserId(userId);
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        // Example using iText 7
-        PdfWriter writer = new PdfWriter(out);
-        PdfDocument pdfDoc = new PdfDocument(writer);
-        Document document = new Document(pdfDoc);
-
-        document.add(new Paragraph("Transactions Report"));
-        for (Transactions tx : transactions) {
-            document.add(new Paragraph(String.format(
-                    "ID: %s, Account: %s, Amount: %.2f, Type: %s, Date: %s",
-                    tx.getTransactionId(), tx.getAccountId(),
-                    tx.getAmount(), tx.getType(), tx.getDate())));
-        }
-
-        document.close();
-
-        return Response.ok(new ByteArrayInputStream(out.toByteArray()))
-                .header("Content-Disposition", "attachment; filename=\"transactions.pdf\"")
-                .build();
-    }*/
+    /*
+     * @GET
+     * 
+     * @Path("/{userId}/pdf")
+     * 
+     * @Produces("application/pdf")
+     * public Response getTransactionsPdf(@PathParam("userId") String userId) {
+     * List<Transactions> transactions =
+     * transactionService.getTransactionsByUserId(userId);
+     * 
+     * ByteArrayOutputStream out = new ByteArrayOutputStream();
+     * 
+     * // Example using iText 7
+     * PdfWriter writer = new PdfWriter(out);
+     * PdfDocument pdfDoc = new PdfDocument(writer);
+     * Document document = new Document(pdfDoc);
+     * 
+     * document.add(new Paragraph("Transactions Report"));
+     * for (Transactions tx : transactions) {
+     * document.add(new Paragraph(String.format(
+     * "ID: %s, Account: %s, Amount: %.2f, Type: %s, Date: %s",
+     * tx.getTransactionId(), tx.getAccountId(),
+     * tx.getAmount(), tx.getType(), tx.getDate())));
+     * }
+     * 
+     * document.close();
+     * 
+     * return Response.ok(new ByteArrayInputStream(out.toByteArray()))
+     * .header("Content-Disposition", "attachment; filename=\"transactions.pdf\"")
+     * .build();
+     * }
+     */
 
 }

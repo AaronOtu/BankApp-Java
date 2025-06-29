@@ -1,0 +1,12 @@
+# services:
+#   backend:
+#     image: bankapp
+#     pull_policy: never
+#     container_name: bankapp
+#     build:
+#       context: .
+#       dockerfile: dockerfile
+#     ports:
+#       - "3000:3000"
+#     env_file:
+#       - .env  
