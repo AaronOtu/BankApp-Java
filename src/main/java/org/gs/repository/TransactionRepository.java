@@ -8,13 +8,20 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import org.gs.dto.AccountResponse;
 import org.gs.dto.DepositRequest;
 import org.gs.dto.Status;
 import org.gs.dto.TransactionType;
+import org.gs.dto.TransferRequest;
+import org.gs.dto.TransferResult;
 import org.gs.model.Transactions;
+import org.gs.model.Transfer;
+import org.gs.service.ExchangeService;
+import org.gs.service.TransferService;
 import org.jboss.logging.Logger;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,15 +30,32 @@ import java.util.UUID;
 public class TransactionRepository {
     private static final Logger logger = Logger.getLogger(TransactionRepository.class);
 
+    private final ExchangeService exchangeService;
+
     @Inject
     AgroalDataSource dataSource;
 
     @Inject
     AccountRepository accountRepository;
 
+    @Inject
+    TransferService transferService;
+
+    @Inject
+    public TransactionRepository(AccountRepository accountRepository,
+            ExchangeService exchangeService) {
+        this.accountRepository = accountRepository;
+        this.exchangeService = exchangeService;
+    }
+
     @Transactional
     public Transactions deposit(DepositRequest request) {
         try {
+            double depositAmount = request.getAmount();
+            if (depositAmount <= 0) {
+                throw new WebApplicationException(
+                        Response.status(Response.Status.BAD_REQUEST).entity("Invalid deposit amount").build());
+            }
 
             accountRepository.updateBalance(request.getAccountId(), request.getAmount());
 
@@ -93,44 +117,119 @@ public class TransactionRepository {
 
     }
 
-    /*
-     * @Transactional
-     * public Transactions transfer(String fromAccountId, String toAccountId, double
-     * amount, String description) {
-     * // 1. Verify accounts exist
-     * if (!accountRepository.accountExists(fromAccountId)) {
-     * throw new WebApplicationException("Sender account not found",
-     * Response.Status.NOT_FOUND);
-     * }
-     * if (!accountRepository.accountExists(toAccountId)) {
-     * throw new WebApplicationException("Recipient account not found",
-     * Response.Status.NOT_FOUND);
-     * }
-     * 
-     * // 2. Verify sufficient balance
-     * double currentBalance =
-     * accountRepository.getAccount(fromAccountId).getBalance();
-     * if (amount > currentBalance) {
-     * throw new WebApplicationException("Insufficient funds",
-     * Response.Status.BAD_REQUEST);
-     * }
-     * 
-     * // 3. Perform transfer
-     * accountRepository.updateBalance(fromAccountId, -amount);
-     * accountRepository.updateBalance(toAccountId, amount);
-     * 
-     * // 4. Record transaction
-     * return recordTransaction(
-     * fromAccountId,
-     * toAccountId,
-     * amount,
-     * TransactionType.TRANSFER,
-     * "NGN",
-     * generateReference(),
-     * description,
-     * "success");
-     * }
-     */
+    @Transactional
+    public TransferResult transfer(TransferRequest request) {
+        // Verify accounts exist
+        String fromAccountId = accountRepository.getAccountIdByAccountNumber(request.getFromAccount());
+        String toAccountId = accountRepository.getAccountIdByAccountNumber(request.getToAccount());
+        double amount = request.getAmount();
+        String description = request.getDescription();
+
+        if (fromAccountId == null) {
+            throw new WebApplicationException("Source account not found", Response.Status.NOT_FOUND);
+        }
+        if (toAccountId == null) {
+            throw new WebApplicationException("Destination account not found", Response.Status.NOT_FOUND);
+        }
+        if (amount <= 0) {
+            throw new WebApplicationException("Invalid amount", Response.Status.BAD_REQUEST);
+        }
+
+        // Verifying if balance is sufficient
+        AccountResponse fromAccount = accountRepository.getAccount(fromAccountId);
+        if (amount > fromAccount.getBalance()) {
+            throw new WebApplicationException("Insufficient funds", Response.Status.BAD_REQUEST);
+        }
+
+        double exchangeRate = exchangeService.getExchangeRate(
+                request.getFromCurrency(),
+                request.getToCurrency());
+        double convertedAmount = amount * exchangeRate;
+
+        String reference = generateReference();
+        LocalDateTime now = LocalDateTime.now();
+
+        Transfer outgoingTx = recordTransaction(
+                fromAccountId,
+                toAccountId,
+                amount,
+                convertedAmount,
+                request.getFromCurrency(),
+                request.getToCurrency(),
+                exchangeRate,
+                TransactionType.TRANSFER_OUT,
+                reference,
+                description,
+                Status.SUCCESS, // Start as pending
+                now);
+
+        Transfer incomingTx = recordTransaction(
+                toAccountId,
+                fromAccountId,
+                convertedAmount,
+                amount,
+                request.getToCurrency(),
+                request.getFromCurrency(),
+                exchangeRate,
+                TransactionType.TRANSFER_IN,
+                reference,
+                description,
+                Status.SUCCESS,
+                now);
+
+        try {
+            // 6. Perform transfer (deduct from source, add to destination)
+            accountRepository.updateBalance(fromAccountId, -amount);
+            accountRepository.updateBalance(toAccountId, convertedAmount);
+
+            /*
+             * // 7. Update transaction statuses to SUCCESS
+             * 
+             * outgoingTx.setStatus(Status.SUCCESS);
+             * incomingTx.setStatus(Status.SUCCESS);
+             */
+
+            return new TransferResult(outgoingTx);
+        } catch (Exception e) {
+
+            outgoingTx.setStatus(Status.FAILED);
+            incomingTx.setStatus(Status.FAILED);
+
+            throw new WebApplicationException("Transfer failed: " + e.getMessage(),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private Transfer recordTransaction(
+            String fromAccountId,
+            String toAccountId,
+            double amount,
+            double convertedAmount,
+            String fromCurrency,
+            String toCurrency,
+            double exchangeRate,
+            TransactionType type,
+            String reference,
+            String description,
+            Status status,
+            LocalDateTime timestamp) {
+
+        Transfer transaction = new Transfer();
+        transaction.setFromAccountId(fromAccountId);
+        transaction.setToAccountId(toAccountId);
+        transaction.setAmount(amount);
+        transaction.setConvertedAmount(convertedAmount);
+        transaction.setFromCurrency(fromCurrency);
+        transaction.setToCurrency(toCurrency);
+        transaction.setExchangeRate(exchangeRate);
+        transaction.setType(type.getValue().toLowerCase());
+        transaction.setReference(reference);
+        transaction.setDescription(description);
+        transaction.setStatus(status);
+        transaction.setTransactionDate(timestamp);
+
+        return transferService.save(transaction);
+    }
 
     public List<Transactions> getTransactionsByAccount(String accountId) {
         List<Transactions> transactions = new ArrayList<>();
@@ -230,4 +329,5 @@ public class TransactionRepository {
     private String generateReference() {
         return "TX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
+
 }

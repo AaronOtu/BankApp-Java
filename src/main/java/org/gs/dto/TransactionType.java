@@ -3,7 +3,8 @@ package org.gs.dto;
 public enum TransactionType {
     DEPOSIT("deposit"),
     WITHDRAWAL("withdrawal"),
-    TRANSFER("transfer");
+    TRANSFER_IN("transfer_in"),
+    TRANSFER_OUT("transfer_out");
 
     private final String value;
 

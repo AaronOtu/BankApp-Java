@@ -100,3 +100,11 @@ src/
 • Implement transaction logs
 • Add unit and integration tests
 • Add Docker support
+
+# deploying using docker
+1.run the command below to package app in JVM mode
+ ./mvnw package -DskipTests
+2. build the image pointing to the generated dockerfile by quarkus and provide the name of the inage 
+ docker build -f src/main/docker/Dockerfile.jvm -t my-quarkus-app .
+3. run the image
+docker run -p 8080:8080 my-quarkus-app 

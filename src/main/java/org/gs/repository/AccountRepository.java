@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Random;
 import org.gs.dto.AccountRequest;
 import org.gs.dto.AccountResponse;
 import org.gs.model.User;
@@ -44,7 +44,7 @@ public class AccountRepository {
         try (Connection cnn = dataSource.getConnection();
                 PreparedStatement ps = cnn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, request.getUserId());
-            ps.setString(2, request.getAccountNumber());
+            ps.setString(2, /* request.getAccountNumber() */generateAccountNumber());
             ps.setString(3, request.getAccountType().getValue().toLowerCase());
             ps.setDouble(4, 0.0);
             ps.executeUpdate();
@@ -145,7 +145,7 @@ public class AccountRepository {
 
     }
 
-   //TODO: add delete message respone
+    // TODO: add delete message respone
     public String deleteAccount(String id) {
         String sql = "DELETE FROM accounts WHERE id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -164,33 +164,53 @@ public class AccountRepository {
     }
 
     public boolean accountExists(String accountId) {
-    String sql = "SELECT 1 FROM accounts WHERE id = ?";
-    try (Connection conn = dataSource.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, accountId);
-        ResultSet rs = ps.executeQuery();
-        return rs.next();
-    } catch (SQLException e) {
-        logger.error("Error checking account existence: " + e.getMessage());
-        return false;
-    }
-}
-
-@Transactional
-public void updateBalance(String accountId, double amount) {
-    String sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?";
-    try (Connection conn = dataSource.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setDouble(1, amount);
-        ps.setString(2, accountId);
-        int rowsAffected = ps.executeUpdate();
-        if (rowsAffected == 0) {
-            throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+        String sql = "SELECT 1 FROM accounts WHERE id = ?";
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            logger.error("Error checking account existence: " + e.getMessage());
+            return false;
         }
-    } catch (SQLException e) {
-        logger.error("Error updating balance: " + e.getMessage());
-        throw new WebApplicationException("Failed to update balance", Response.Status.INTERNAL_SERVER_ERROR);
     }
-}
 
+    @Transactional
+    public void updateBalance(String accountId, double amount) {
+        String sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?";
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, amount);
+            ps.setString(2, accountId);
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new WebApplicationException("Account not found", Response.Status.NOT_FOUND);
+            }
+        } catch (SQLException e) {
+            logger.error("Error updating balance: " + e.getMessage());
+            throw new WebApplicationException("Failed to update balance", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public String getAccountIdByAccountNumber(String accountNumber) {
+        String sql = "SELECT id FROM accounts WHERE account_number = ?";
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, accountNumber);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("id");
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching account ID by account number: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private String generateAccountNumber() {
+        Random random = new Random();
+        long number = Math.abs(random.nextLong() % 1_000_000_0000L);
+        return String.format("%010d", number);
+    }
 }

@@ -6,3 +6,174 @@
     // 6. Deposit into an account
     // 7. Withdraw from an account
     // 8. Transfer between two accounts
+
+
+
+
+
+{
+  "fromAccount": "1234567890",
+  "toAccount": "0987654321",
+  "amount": 1000,
+  "fromCurrency": "GHS",
+  "toCurrency": "USD",
+  "description": "International transfer"
+}
+
+
+{
+  "id": "txn_12345",
+  "fromAccountId": "acc_123",
+  "toAccountId": "acc_456",
+  "amount": 1000,
+  "convertedAmount": 97.087,
+  "fromCurrency": "GHS",
+  "toCurrency": "USD",
+  "exchangeRate": 0.097087,
+  "type": "TRANSFER",
+  "reference": "REF123456",
+  "description": "International transfer",
+  "status": "SUCCESS",
+  "transactionDate": "2025-06-24T14:30:45"
+}
+
+
+ALTER TABLE transactions
+-- Add fields for transfer-specific information
+ADD COLUMN to_account_id INT NULL AFTER account_id,
+ADD COLUMN converted_amount DECIMAL(10, 2) NULL AFTER amount,
+ADD COLUMN to_currency VARCHAR(10) NULL AFTER currency,
+ADD COLUMN exchange_rate DECIMAL(10, 6) NULL AFTER to_currency,
+
+-- Modify constraints to accommodate transfers
+MODIFY COLUMN transaction_type VARCHAR(20) NOT NULL 
+    CHECK (transaction_type IN ('deposit', 'withdrawal', 'transfer_in', 'transfer_out')),
+
+-- Add foreign key for transfer destination
+ADD CONSTRAINT fk_transactions_to_account 
+    FOREIGN KEY (to_account_id) REFERENCES accounts(id);
+
+
+
+
+    @Path("/transactions")
+public class TransactionsResource {
+    private final TransactionRepository transactionRepository;
+
+    @Inject
+    public TransactionsResource(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
+
+    @POST
+    @Path("/transfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response transfer(TransferRequest request) {
+        try {
+            return Response.ok(transactionRepository.transfer(request)).build();
+        } catch (WebApplicationException e) {
+            return Response.status(e.getResponse().getStatus()).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    // ... your existing deposit endpoint ...
+}
+
+
+@Inject
+ForexService forexService;
+
+@Transactional    
+public Transactions transfer(TransferRequest request) {
+    // 1. Verify accounts exist
+    String fromAccountId = accountRepository.getAccountIdByAccountNumber(request.getFromAccount());
+    String toAccountId = accountRepository.getAccountIdByAccountNumber(request.getToAccount());
+    double amount = request.getAmount();
+    String description = request.getDescription();
+
+    if (fromAccountId == null) {
+        throw new WebApplicationException("Source account not found", Response.Status.NOT_FOUND);
+    }
+    if (toAccountId == null) {
+        throw new WebApplicationException("Destination account not found", Response.Status.NOT_FOUND);
+    }
+    if (amount <= 0) {
+        throw new WebApplicationException("Invalid amount", Response.Status.BAD_REQUEST);
+    }
+
+    // 2. Verify sufficient balance
+    Account fromAccount = accountRepository.getAccount(fromAccountId);
+    if (amount > fromAccount.getBalance()) {
+        throw new WebApplicationException("Insufficient funds", Response.Status.BAD_REQUEST);
+    }
+
+    // 3. Get exchange rate and calculate converted amount
+    double exchangeRate = forexService.getExchangeRate(
+        request.getFromCurrency(), 
+        request.getToCurrency()
+    );
+    double convertedAmount = amount * exchangeRate;
+
+    // 4. Perform transfer (deduct from source, add to destination)
+    accountRepository.updateBalance(fromAccountId, -amount);
+    accountRepository.updateBalance(toAccountId, convertedAmount);
+
+    // 5. Record transaction
+    return recordTransaction(
+        fromAccountId,
+        toAccountId,
+        amount,
+        convertedAmount,
+        request.getFromCurrency(),
+        request.getToCurrency(),
+        exchangeRate,
+        TransactionType.TRANSFER,
+        generateReference(),
+        description,
+        Status.SUCCESS
+    );
+}
+
+// Updated recordTransaction method
+private Transactions recordTransaction(
+    String fromAccountId,
+    String toAccountId,
+    double amount,
+    double convertedAmount,
+    String fromCurrency,
+    String toCurrency,
+    double exchangeRate,
+    TransactionType type,
+    String reference,
+    String description,
+    Status status
+) {
+    Transactions transaction = new Transactions();
+    transaction.setFromAccountId(fromAccountId);
+    transaction.setToAccountId(toAccountId);
+    transaction.setAmount(amount);
+    transaction.setConvertedAmount(convertedAmount);
+    transaction.setFromCurrency(fromCurrency);
+    transaction.setToCurrency(toCurrency);
+    transaction.setExchangeRate(exchangeRate);
+    transaction.setType(type);
+    transaction.setReference(reference);
+    transaction.setDescription(description);
+    transaction.setStatus(status);
+    transaction.setTransactionDate(LocalDateTime.now());
+    
+    return transactionRepository.save(transaction);
+}
+
+
+{
+  "fromAccount": "41089765466",
+  "toAccount": "2929614261",
+  "amount": 50,
+  "fromCurrency": "GHS",
+  "toCurrency": "GHS",
+  "description": "enjoy"
+}

@@ -6,8 +6,7 @@ public class AccountResponse {
     private String id;
     private String accountNumber;
     private String userId;
-    
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+      @JsonInclude(JsonInclude.Include.NON_NULL)
     private String userName;
 
     public String getUserName() {

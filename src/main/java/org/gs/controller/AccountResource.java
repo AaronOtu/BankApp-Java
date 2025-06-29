@@ -3,8 +3,6 @@ package org.gs.controller;
 import org.gs.dto.AccountRequest;
 import org.gs.dto.AccountResponse;
 import org.gs.repository.AccountRepository;
-import org.gs.service.AccountService;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -17,12 +15,12 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/accounts")
 public class AccountResource {
-    private final AccountService accountService;
+    /*private final AccountService accountService;*/
     private final AccountRepository accountRepository;
 
     @Inject
-    public AccountResource(AccountService accountService, AccountRepository accountRepository) {
-        this.accountService = accountService;
+    public AccountResource(/*AccountService accountService, */AccountRepository accountRepository) {
+       /*  this.accountService = accountService;*/
         this.accountRepository = accountRepository;
     }
 

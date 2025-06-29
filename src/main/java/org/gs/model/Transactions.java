@@ -2,8 +2,6 @@ package org.gs.model;
 
 import java.time.LocalDateTime;
 
-import org.gs.dto.TransactionType;
-
 public class Transactions {
     private String id;
     private String accountId;
@@ -15,7 +13,6 @@ public class Transactions {
     private String status;
     private LocalDateTime transactionDate;
 
-    
     public String getId() {
         return id;
     }
@@ -31,14 +28,6 @@ public class Transactions {
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
-
-    // public String getRelatedAccountId() {
-    //     return relatedAccountId;
-    // }
-
-    // public void setRelatedAccountId(String relatedAccountId) {
-    //     this.relatedAccountId = relatedAccountId;
-    // }
 
     public String getTransactionType() {
         return transactionType;

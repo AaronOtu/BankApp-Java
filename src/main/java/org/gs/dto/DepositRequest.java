@@ -3,6 +3,7 @@ package org.gs.dto;
 public class DepositRequest {
     private double amount;
     private String accountId;
+    
     private String currency;
 
     public String getCurrency() {
