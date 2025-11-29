@@ -1,8 +1,6 @@
 package org.gs.controller;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
@@ -10,11 +8,6 @@ import org.gs.dto.DepositRequest;
 import org.gs.dto.TransferRequest;
 import org.gs.model.Transactions;
 import org.gs.repository.TransactionRepository;
-
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;

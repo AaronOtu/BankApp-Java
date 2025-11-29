@@ -1,12 +1,25 @@
-# services:
-#   backend:
-#     image: bankapp
-#     pull_policy: never
-#     container_name: bankapp
-#     build:
-#       context: .
-#       dockerfile: dockerfile
-#     ports:
-#       - "3000:3000"
-#     env_file:
-#       - .env  
+services:
+  backend:
+    image: bankapp
+    pull_policy: never
+    container_name: bankapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env  
+  db:
+    image: mysql:8.0
+    container_name: bankapp-db
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
+      MYSQL_DATABASE: "${DATABASE_NAME}"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:  

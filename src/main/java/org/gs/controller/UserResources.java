@@ -27,19 +27,23 @@ public class UserResources {
         this.userRepository = userRepository;
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response registerUser(UserRequest user) {
-        try {
-
-            User created = userRepository.addUser(user);
-            return Response.status(Response.Status.CREATED).entity(created).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
-    }
-
+    /*
+     * @POST
+     * 
+     * @Consumes(MediaType.APPLICATION_JSON)
+     * 
+     * @Produces(MediaType.APPLICATION_JSON)
+     * public Response registerUser(UserRequest user) {
+     * try {
+     * 
+     * User created = userRepository.addUser(user);
+     * return Response.status(Response.Status.CREATED).entity(created).build();
+     * } catch (Exception e) {
+     * return
+     * Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+     * }
+     * }
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
